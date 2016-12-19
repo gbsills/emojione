@@ -1,0 +1,11 @@
+# User-specific files
+*.suo
+*.user
+
+## NuGet Packages
+packages/
+
+# Others
+[Bb]in
+[Oo]bj
+TestResults
