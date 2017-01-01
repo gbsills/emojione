@@ -1,10 +1,10 @@
-# EmojiOne utility for C#
+# EmojiOne utility for C# 
 
 A C# implementation of [EmojiOne](https://github.com/Ranks/emojione) for converting Unicode emoji characters to :shortnames: and :shortnames: to emoji images etc. 
 
 ## Installation
 
-To install EmojiOne, run the following command in the Nuget [Package Manager Console](https://docs.nuget.org/docs/start-here/using-the-package-manager-console)
+To install EmojiOne, run the following command in the [Nuget Package Manager Console](https://docs.nuget.org/docs/start-here/using-the-package-manager-console)
 
     PM> Install-Package EmojiOne
 
@@ -37,4 +37,4 @@ Unifies all emoji to their standard unicode types.
 
 ## Building from source
 
-* Running build.cmd will compile and package the project into a nuget package.
+* Running `build.cmd` will compile and package the project into a nuget package.
