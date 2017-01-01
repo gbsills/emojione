@@ -2,7 +2,8 @@
 *.suo
 *.user
 
-## NuGet Packages
+## NuGet
+*.nupkg
 packages/
 
 # Others

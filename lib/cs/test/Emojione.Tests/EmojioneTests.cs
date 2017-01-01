@@ -1,9 +1,9 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace Emojione.Tests {
+namespace EmojiOne.Tests {
     [TestClass]
-    public class EmojioneTests {
+    public class EmojiOneTests {
 
         [TestMethod]
         public void Version224Emoji() {
