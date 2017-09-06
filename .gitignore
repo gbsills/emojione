@@ -13,3 +13,4 @@ build/
 emojipy-*/
 emojipy.egg-info/
 npm-debug.log
+.vs/

@@ -78,15 +78,17 @@ namespace Codegen {
                     }
                     sw.WriteLine(@")"";");
                     sw.WriteLine();
+                    // NOTE: these must be ordered by length of the Unicode property
                     sw.Write(@"        private const string UNICODE_PATTERN = @""(");
-                    for (int i = 0; i < emojis.Count; i++) {
-                        var emoji = emojis.ElementAt(i).Value;
+                    var sorted = emojis.Values.OrderByDescending(e => e.Unicode.Length).ToList();
+                    for (int i = 0; i < sorted.Count; i++) {
+                        var emoji = sorted.ElementAt(i);
                         sw.Write(ToSurrogateString(emoji.Unicode));
                         if (!string.IsNullOrEmpty(emoji.Alternates)) {
                             sw.Write("|");
                             sw.Write(ToSurrogateString(emoji.Alternates));
                         }
-                        if (i < emojis.Count - 1) {
+                        if (i < sorted.Count - 1) {
                             sw.Write("|");
                         }
                     }

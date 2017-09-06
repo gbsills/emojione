@@ -7,7 +7,7 @@
 
   <Target Name="PackageRestore">
     <Message Text="Restoring Nuget packages" Importance="High" />
-    <Exec Command="Nuget.exe restore" WorkingDirectory="$(MSBuildProjectDirectory)"/>
+    <Exec Command="$(MSBuildProjectDirectory)\tools\Nuget.exe restore" WorkingDirectory="$(MSBuildProjectDirectory)"/>
   </Target>
 
   <Target Name="Publish" DependsOnTargets="PackageRestore">
@@ -20,7 +20,7 @@
   </Target>
 
   <Target Name="Package" DependsOnTargets="Publish">
-    <Exec Command="Nuget.exe pack -properties Configuration=$(Configuration) -outputdirectory $(MSBuildProjectDirectory)" WorkingDirectory="$(MSBuildProjectDirectory)\src\EmojiOne"/>
+    <Exec Command="$(MSBuildProjectDirectory)\tools\Nuget.exe pack -properties Configuration=$(Configuration) -outputdirectory $(MSBuildProjectDirectory)" WorkingDirectory="$(MSBuildProjectDirectory)\src\EmojiOne"/>
   </Target>
 
 </Project>

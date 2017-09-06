@@ -6,33 +6,6 @@ namespace EmojiOne.Tests {
     public class EmojiOneTests {
 
         [TestMethod]
-        public void Version224Emoji() {
-            // test that new emoji from v2.2.4 works
-            string text = ":first_place:";
-            string expected = $@"<img class=""emojione"" alt=""🥇"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f947.png{EmojiOne.CacheBustParam}"" />";
-            string actual = EmojiOne.ShortnameToImage(text);
-            Assert.AreEqual(expected, actual);
-
-            text = ":avocado:";
-            expected = "🥑";
-            actual = EmojiOne.ShortnameToUnicode(text);
-            Assert.AreEqual(expected, actual);
-
-            text = "🖤";
-            expected = ":black_heart:";
-            actual = EmojiOne.ToShort(text);
-            Assert.AreEqual(expected, actual);
-        }
-
-        [TestMethod]
-        public void NumberShouldNotBeConvertedToShortname() {
-            string text = "2";
-            string notexpected = ":digit_two:";
-            string actual = EmojiOne.ToShort(text);
-            Assert.AreNotEqual(notexpected, actual);
-        }
-
-        [TestMethod]
         public void AsciiToUnicode() {
             // single smiley
             string text = ":D";
@@ -477,6 +450,68 @@ namespace EmojiOne.Tests {
             Assert.AreEqual(expected, actual);
         }
 
+        [TestMethod]
+        public void NumberShouldNotBeConvertedToShortname() {
+            string text = "2";
+            string notexpected = ":digit_two:";
+            string actual = EmojiOne.ToShort(text);
+            Assert.AreNotEqual(notexpected, actual);
+        }
+
+        [TestMethod]
+        public void SkinToneEmoji() {
+            string unicode = "👍";
+            string shortname = EmojiOne.ToShort(unicode);
+            string expected = ":thumbsup:";
+            Assert.AreEqual(expected, shortname);
+
+            unicode = "👍🏻";
+            shortname = EmojiOne.ToShort(unicode);
+            expected = ":thumbsup_tone1:";
+            Assert.AreEqual(expected, shortname);
+
+            unicode = "👍🏿";
+            shortname = EmojiOne.ToShort(unicode);
+            expected = ":thumbsup_tone5:";
+            Assert.AreEqual(expected, shortname);
+        }
+
+        [TestMethod]
+        public void FamilyEmoji() {
+            string unicode = "👨‍👩‍👧‍👦";
+            string codepoint = EmojiOne.ToCodePoint(unicode);
+            string expected = "1f468-200d-1f469-200d-1f467-200d-1f466";
+            Assert.AreEqual(expected, codepoint);
+
+            unicode = EmojiOne.ToUnicode(codepoint);
+            string shortname = EmojiOne.ToShort(unicode);
+            expected = ":family_mwgb:";
+            Assert.AreEqual(expected, shortname);
+
+            unicode = "👨‍👩‍👧‍👦";
+            shortname = EmojiOne.ToShort(unicode);
+            expected = ":family_mwgb:";
+            Assert.AreEqual(expected, shortname, "Going from unicode > codepoint > unicode > shortname works, but going directly from unicode > shortname fails");
+        }
+
+        [TestMethod]
+        public void Version224Emoji() {
+            // test that new emoji from v2.2.4 works
+            string text = ":first_place:";
+            string expected = $@"<img class=""emojione"" alt=""🥇"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f947.png{EmojiOne.CacheBustParam}"" />";
+            string actual = EmojiOne.ShortnameToImage(text);
+            Assert.AreEqual(expected, actual);
+
+            text = ":avocado:";
+            expected = "🥑";
+            actual = EmojiOne.ShortnameToUnicode(text);
+            Assert.AreEqual(expected, actual);
+
+            text = "🖤";
+            expected = ":black_heart:";
+            actual = EmojiOne.ToShort(text);
+            Assert.AreEqual(expected, actual);
+        }
 
         private static string ShowX4(string s, int? i = null) {
             string s2 = "";
