@@ -31,12 +31,12 @@ namespace EmojiOne {
     public static partial class EmojiOne {
 
         /// <summary>
-        /// You can [optionally] modify this to load alternate emoji versions.
+        /// Used only to direct CDN path. This is a 2-digit version (e.g. 3.1). Not recommended for usage below 3.0.
         /// </summary>
         public static string EmojiVersion { get; set; } = "4.0";
 
         /// <summary>
-        /// Default emoji size. Valid values are 32, 64 and 128. 512 is also possible when using local premium assets.
+        /// Used only to direct CDN path for non-sprite PNG usage. Available options are 32, 64, and 128.
         /// </summary>
         public static int EmojiSize { get; set; } = 32;
 
@@ -46,9 +46,9 @@ namespace EmojiOne {
         public static string FileExtension { get; set; } = ".png";
 
         /// <summary>
-        /// Path to png assets.
+        /// Defaults to CDN (jsdeliver) path. Change this when using local premium assets.
         /// </summary>
-        public static string ImagePathPng { get; set; } = "https://cdn.jsdelivr.net/emojione/assets/" + EmojiVersion + "/png/";
+        public static string ImagePath { get; set; } = "https://cdn.jsdelivr.net/emojione/assets/" + EmojiVersion + "/png/";
 
         /// <summary>
         /// Takes an input string containing both native unicode emoji and shortnames, and translates it into emoji images for display.
@@ -225,7 +225,7 @@ namespace EmojiOne {
                     if (sprite) {
                         return string.Format(@"<span class=""emojione emojione-{0}"" title=""{1}"">{2}</span>", codepoint, shortname, unicodeAlt ? alt : shortname);
                     } else {
-                        return string.Format(@"<img class=""emojione"" alt=""{0}"" src=""{1}{2}/{3}.png"" />", unicodeAlt ? alt : shortname, ImagePathPng, size ?? EmojiSize, codepoint);
+                        return string.Format(@"<img class=""emojione"" alt=""{0}"" src=""{1}{2}/{3}.png"" />", unicodeAlt ? alt : shortname, ImagePath, size ?? EmojiSize, codepoint);
                     }
                 }
             }
@@ -278,7 +278,7 @@ namespace EmojiOne {
                     if (sprite) {
                         return string.Format(@"<span class=""emojione emojione-{0}"" title=""{1}"">{2}</span>", codepoint, shortname, unicodeAlt ? alt : shortname);
                     } else {
-                        return string.Format(@"<img class=""emojione"" alt=""{0}"" src=""{1}{2}/{3}.png"" />", unicodeAlt ? alt : shortname, ImagePathPng, size ?? EmojiSize, codepoint);
+                        return string.Format(@"<img class=""emojione"" alt=""{0}"" src=""{1}{2}/{3}.png"" />", unicodeAlt ? alt : shortname, ImagePath, size ?? EmojiSize, codepoint);
                     }
                 }
             }
