@@ -1,8 +1,8 @@
 Package.describe({
   name: 'emojione:emojione',
-  summary: 'Meteor Package of http://www.emojione.com/ set',
-  version: '2.2.7',
-  git: 'https://github.com/Ranks/emojione.git'
+  summary: 'Meteor Package of the https://www.emojione.com/ set.',
+  version: '4.0.0',
+  git: 'https://github.com/emojione/emojione.git'
 });
 
 Package.onUse(function(api) {
@@ -11,23 +11,32 @@ Package.onUse(function(api) {
   api.addFiles([
     'lib/meteor/pre-export.js',
     'lib/js/emojione.js',
-    'lib/meteor/post-export.js',
+    'lib/meteor/post-export.js'
   ]);
 
   api.use([
     'blaze',
     'htmljs',
-    'templating',
+    'templating'
   ], 'client');
 
   api.addFiles([
     'lib/meteor/emojione-client.js',
-    'assets/css/emojione.css',
+    'extras/css/emojione.css',
+    'extras/css/emojione-awesome.css'
   ], 'client');
-
-  api.addAssets('assets/sprites/emojione.sprites.css', 'client');
-  api.addAssets('assets/sprites/emojione.sprites.svg', 'client');
-  api.addAssets('assets/sprites/emojione.sprites.png', 'client');
+  
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32.min.css', 'client');
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32-activity.png', 'client');
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32-diversity.png', 'client');
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32-flags.png', 'client');
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32-food.png', 'client');
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32-nature.png', 'client');
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32-objects.png', 'client');
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32-people.png', 'client');
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32-regional.png', 'client');
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32-symbols.png', 'client');
+  api.addAssets('../emojione-assets/sprites/emojione-sprite-32-travel.png', 'client');
 
   api.export('emojione');
 });

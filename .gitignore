@@ -14,3 +14,4 @@ emojipy-*/
 emojipy.egg-info/
 npm-debug.log
 .vs/
+lib/js/tests/npm-debug.log

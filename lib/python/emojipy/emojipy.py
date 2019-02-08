@@ -13,21 +13,17 @@ else:
     chr = unichr
 
 from .ruleset import unicode_replace,\
-    shortcode_replace, ascii_replace
+    shortcode_replace, ascii_replace, category_replace
 
 
 class Emoji(object):
 
     ascii = False
     unicode_alt = True
-    image_type = 'png'
-    cache_bust_param = '?v=1.2.5'
     sprites = False
-    image_png_path = 'https://cdn.jsdelivr.net/emojione/assets/png/'
-    image_svg_path = 'https://cdn.jsdelivr.net/emojione/assets/svg/'
-    image_path_svg_sprites = './../../assets/sprites/emojione.sprites.svg'
+    image_png_path = 'https://cdn.jsdelivr.net/emojione/assets/3.1/png/64/'
     ignored_regexp = '<object[^>]*>.*?<\/object>|<span[^>]*>.*?<\/span>|<(?:object|embed|svg|img|div|span|p|a)[^>]*>'
-    unicode_regexp = "(" + '|'.join([re.escape(x.decode("utf-8")) for x in unicode_replace]) + ")"
+    unicode_regexp = "(" + '|'.join([re.escape(x.decode("utf-8")) for x in sorted(unicode_replace.keys(), key=len, reverse=True)]) + ")"
     shortcode_regexp = ':([-+\\w]+):'
     ascii_regexp = '(\\<3|&lt;3|\\<\\/3|&lt;\\/3|\\:\'\\)|\\:\'\\-\\)|\\:D|\\:\\-D|\\=D|\\:\\)|\\:\\-\\)|\\=\\]|\\=\\)|\\:\\]|\'\\:\\)|\'\\:\\-\\)|\'\\=\\)|\'\\:D|\'\\:\\-D|\'\\=D|\\>\\:\\)|&gt;\\:\\)|\\>;\\)|&gt;;\\)|\\>\\:\\-\\)|&gt;\\:\\-\\)|\\>\\=\\)|&gt;\\=\\)|;\\)|;\\-\\)|\\*\\-\\)|\\*\\)|;\\-\\]|;\\]|;D|;\\^\\)|\'\\:\\(|\'\\:\\-\\(|\'\\=\\(|\\:\\*|\\:\\-\\*|\\=\\*|\\:\\^\\*|\\>\\:P|&gt;\\:P|X\\-P|x\\-p|\\>\\:\\[|&gt;\\:\\[|\\:\\-\\(|\\:\\(|\\:\\-\\[|\\:\\[|\\=\\(|\\>\\:\\(|&gt;\\:\\(|\\>\\:\\-\\(|&gt;\\:\\-\\(|\\:@|\\:\'\\(|\\:\'\\-\\(|;\\(|;\\-\\(|\\>\\.\\<|&gt;\\.&lt;|\\:\\$|\\=\\$|#\\-\\)|#\\)|%\\-\\)|%\\)|X\\)|X\\-\\)|\\*\\\\0\\/\\*|\\\\0\\/|\\*\\\\O\\/\\*|\\\\O\\/|O\\:\\-\\)|0\\:\\-3|0\\:3|0\\:\\-\\)|0\\:\\)|0;\\^\\)|O\\:\\-\\)|O\\:\\)|O;\\-\\)|O\\=\\)|0;\\-\\)|O\\:\\-3|O\\:3|B\\-\\)|B\\)|8\\)|8\\-\\)|B\\-D|8\\-D|\\-_\\-|\\-__\\-|\\-___\\-|\\>\\:\\\\|&gt;\\:\\\\|\\>\\:\\/|&gt;\\:\\/|\\:\\-\\/|\\:\\-\\.|\\:\\/|\\:\\\\|\\=\\/|\\=\\\\|\\:L|\\=L|\\:P|\\:\\-P|\\=P|\\:\\-p|\\:p|\\=p|\\:\\-Þ|\\:\\-&THORN;|\\:Þ|\\:&THORN;|\\:þ|\\:&thorn;|\\:\\-þ|\\:\\-&thorn;|\\:\\-b|\\:b|d\\:|\\:\\-O|\\:O|\\:\\-o|\\:o|O_O|\\>\\:O|&gt;\\:O|\\:\\-X|\\:X|\\:\\-#|\\:#|\\=X|\\=x|\\:x|\\:\\-x|\\=#)'
     shortcode_compiled = re.compile(ignored_regexp+"|("+shortcode_regexp+")",
@@ -57,25 +53,16 @@ class Emoji(object):
             else:
                 alt = shortcode
             filename = shortcode_replace[shortcode]
+            category = category_replace[shortcode]
 
-            if cls.image_type == 'png':
-                if cls.sprites:
-                    return '<span class="emojione emojione-%s" title="%s">%s</span>'\
-                        % (filename, escape(shortcode), alt)
-                else:
-                    return '<img class="emojione" alt="%s" src="%s"/>' % (
-                        alt,
-                        cls.image_png_path+filename+'.png'+cls.cache_bust_param
-                    )
+            if cls.sprites:
+                return '<span class="emojione emojione-32-%s _%s" title="%s">%s</span>'\
+                    % (category, filename, escape(shortcode), alt)
             else:
-                if cls.sprites:
-                    return '<svg class="emojione"><description>%s</description>\
-                    <use xlink:href="%s#emoji-%s"</use></svg>' % (
-                        alt, cls.image_path_svg_sprites, filename)
-                else:
-                    return '<object class="emojione" data="%s" \
-                    type="image/svg+xml" standby="%s"> %s</object>' % (
-                        cls.image_svg_path+filename+'.svg'+cls.cache_bust_param, alt, alt)
+                return '<img class="emojione" alt="%s" src="%s"/>' % (
+                    alt,
+                    cls.image_png_path+filename+'.png'
+                )
 
         text = re.sub(cls.unicode_compiled, replace_unicode, text)
         return text
@@ -92,24 +79,16 @@ class Emoji(object):
             else:
                 alt = shortcode
             filename = shortcode_replace[shortcode]
-            if cls.image_type == 'png':
-                if cls.sprites:
-                    return '<span class="emojione emojione-%s" title="%s">%s</span>'\
-                        % (filename, escape(shortcode), alt)
-                else:
-                    return '<img class="emojione" alt="%s" src="%s"/>' % (
-                        alt,
-                        cls.image_png_path+filename+'.png'+cls.cache_bust_param
-                    )
+            category = category_replace[shortcode]
+            
+            if cls.sprites:
+                return '<span class="emojione emojione-32-%s _%s" title="%s">%s</span>'\
+                    % (category, filename, escape(shortcode), alt)
             else:
-                if cls.sprites:
-                    return '<svg class="emojione"><description>%s</description>\
-                    <use xlink:href="%s#emoji-%s"</use></svg>' % (
-                        alt, cls.image_path_svg_sprites, filename)
-                else:
-                    return '<object class="emojione" data="%s" \
-                    type="image/svg+xml" standby="%s"> %s</object>' % (
-                        cls.image_svg_path+filename+'.svg'+cls.cache_bust_param, alt, alt)
+                return '<img class="emojione" alt="%s" src="%s"/>' % (
+                    alt,
+                    cls.image_png_path+filename+'.png'
+                )
 
         text = re.sub(cls.shortcode_compiled, replace_shortcode, text)
         if cls.ascii:
@@ -167,25 +146,11 @@ class Emoji(object):
                 alt = cls.convert(unicode)
             else:
                 alt = escape(ascii)
-            if cls.image_type == 'png':
-                if cls.sprites:
-                    return '<span class="emojione emojione-%s" title="%s">%s</span>'\
-                        % (unicode, escape(ascii), alt)
-                else:
-                    return '<img class="emojione" alt="%s" src="%s"/>' % (
-                        alt,
-                        cls.image_png_path+unicode+'.png'+cls.cache_bust_param
-                    )
-            else:
-                if cls.sprites:
-                    return '<svg class="emojione"><description>%s</description>\
-                    <use xlink:href="%s#emoji-%s"</use></svg>' % (
-                        alt, cls.image_path_svg_sprites, unicode)
-                else:
-                    return '<object class="emojione" data="%s" \
-                    type="image/svg+xml" standby="%s"> %s</object>' % (
-                        cls.image_svg_path+unicode+'.svg'+cls.cache_bust_param,
-                        alt, alt)
+            
+            return '<img class="emojione" alt="%s" src="%s"/>' % (
+                alt,
+                cls.image_png_path+unicode+'.png'
+            )
         return re.sub(cls.ascii_compiled, replace_ascii, text)
 
     @classmethod
