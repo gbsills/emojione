@@ -46,13 +46,13 @@ namespace Codegen {
                     sw.WriteLine();
                     sw.WriteLine(@"    public static partial class EmojiOne {");
                     sw.WriteLine();
-                    var asciis = emojis.Values.Where(x => x.Asciis.Any());
+                    var asciis = emojis.Values.Where(x => x.Ascii.Any());
                     sw.Write(@"        private const string ASCII_PATTERN = @""(?<=\s|^)(");
                     for (int i = 0; i < asciis.Count(); i++) {
                         var emoji = asciis.ElementAt(i);
-                        for (int j = 0; j < emoji.Asciis.Count; j++) {
-                            sw.Write(Regex.Escape(emoji.Asciis[j]));
-                            if (j < emoji.Asciis.Count - 1) {
+                        for (int j = 0; j < emoji.Ascii.Length; j++) {
+                            sw.Write(Regex.Escape(emoji.Ascii[j]));
+                            if (j < emoji.Ascii.Length - 1) {
                                 sw.Write("|");
                             }
                         }
@@ -71,24 +71,20 @@ namespace Codegen {
                             sw.Write("|");
                         }
                         sw.Write(Regex.Escape(emoji.Shortname));
-                        for (int j = 0; j < emoji.Aliases.Count; j++) {
+                        for (int j = 0; j < emoji.ShortnameAlternates.Length; j++) {
                             sw.Write("|");
-                            sw.Write(Regex.Escape(emoji.Aliases[j]));
+                            sw.Write(Regex.Escape(emoji.ShortnameAlternates[j]));
                         }
                     }
                     sw.WriteLine(@")"";");
                     sw.WriteLine();
-                    // NOTE: these must be ordered by length of the Unicode property
                     sw.Write(@"        private const string UNICODE_PATTERN = @""(");
-                    var sorted = emojis.Values.OrderByDescending(e => e.Unicode.Length).ToList();
-                    for (int i = 0; i < sorted.Count; i++) {
-                        var emoji = sorted.ElementAt(i);
-                        sw.Write(ToSurrogateString(emoji.Unicode));
-                        if (!string.IsNullOrEmpty(emoji.Alternates)) {
-                            sw.Write("|");
-                            sw.Write(ToSurrogateString(emoji.Alternates));
-                        }
-                        if (i < sorted.Count - 1) {
+                    // NOTE: these must be ordered by length of the unicode code point
+                    var codepoints = emojis.Values.SelectMany(e => e.CodePoints.BaseAndDefaultMatches).OrderByDescending(cp => cp.Length).ToList();
+                    for (int i = 0; i < codepoints.Count; i++) {
+                        var cp = codepoints.ElementAt(i);
+                        sw.Write(ToSurrogateString(cp));
+                        if (i < codepoints.Count - 1) {
                             sw.Write("|");
                         }
                     }
@@ -97,9 +93,9 @@ namespace Codegen {
                     sw.WriteLine(@"        private static readonly Dictionary<string, string> ASCII_TO_CODEPOINT = new Dictionary<string, string> {");
                     for (int i = 0; i < asciis.Count(); i++) {
                         var emoji = asciis.ElementAt(i);
-                        for (int j = 0; j < emoji.Asciis.Count; j++) {
-                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.Asciis[j].Replace("\\", "\\\\"), emoji.Unicode.ToLower());
-                            if (j < emoji.Asciis.Count - 1) {
+                        for (int j = 0; j < emoji.Ascii.Length; j++) {
+                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.Ascii[j].Replace("\\", "\\\\"), emoji.CodePoints.Output.ToLower());
+                            if (j < emoji.Ascii.Length - 1) {
                                 sw.WriteLine(",");
                             }
                         }
@@ -113,7 +109,12 @@ namespace Codegen {
                     sw.WriteLine(@"        private static readonly Dictionary<string, string> CODEPOINT_TO_ASCII = new Dictionary<string, string> {");
                     for (int i = 0; i < asciis.Count(); i++) {
                         var emoji = asciis.ElementAt(i);
-                        sw.Write(@"            [""{0}""] = ""{1}""", emoji.Unicode.ToLower(), emoji.Asciis.First().Replace("\\", "\\\\"));
+                        for (int j = 0; j < emoji.CodePoints.BaseAndDefaultMatches.Length; j++) {
+                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.CodePoints.BaseAndDefaultMatches[j].ToLower(), emoji.Ascii.First().Replace("\\", "\\\\"));
+                            if (j < emoji.CodePoints.BaseAndDefaultMatches.Length - 1) {
+                                sw.WriteLine(",");
+                            }
+                        }
                         if (i < asciis.Count() - 1) {
                             sw.WriteLine(",");
                         }
@@ -124,12 +125,13 @@ namespace Codegen {
                     sw.WriteLine(@"        private static readonly Dictionary<string, string> CODEPOINT_TO_SHORTNAME = new Dictionary<string, string> {");
                     for (int i = 0; i < emojis.Count; i++) {
                         var emoji = emojis.ElementAt(i).Value;
-                        sw.Write(@"            [""{0}""] = ""{1}""", emoji.Unicode.ToLower(), emoji.Shortname);
-                        if (!string.IsNullOrEmpty(emoji.Alternates)) {
-                            sw.WriteLine(",");
-                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.Alternates.ToLower(), emoji.Shortname);
+                        for (int j = 0; j < emoji.CodePoints.BaseAndDefaultMatches.Length; j++) {
+                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.CodePoints.BaseAndDefaultMatches[j].ToLower(), emoji.Shortname);
+                            if (j < emoji.CodePoints.BaseAndDefaultMatches.Length - 1) {
+                                sw.WriteLine(",");
+                            }
                         }
-                        if (i < emojis.Count - 1) {
+                         if (i < emojis.Count - 1) {
                             sw.WriteLine(",");
                         }
                     }
@@ -139,10 +141,10 @@ namespace Codegen {
                     sw.WriteLine(@"        private static readonly Dictionary<string, string> SHORTNAME_TO_CODEPOINT = new Dictionary<string, string> {");
                     for (int i = 0; i < emojis.Count; i++) {
                         var emoji = emojis.ElementAt(i).Value;
-                        sw.Write(@"            [""{0}""] = ""{1}""", emoji.Shortname, emoji.Unicode.ToLower());
-                        for (int j = 0; j < emoji.Aliases.Count; j++) {
+                        sw.Write(@"            [""{0}""] = ""{1}""", emoji.Shortname, emoji.CodePoints.Output.ToLower());
+                        for (int j = 0; j < emoji.ShortnameAlternates.Length; j++) {
                             sw.WriteLine(",");
-                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.Aliases[j], emoji.Unicode.ToLower());
+                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.ShortnameAlternates[j], emoji.CodePoints.Output.ToLower());
                         }
                         if (i < emojis.Count - 1) {
                             sw.WriteLine(",");
@@ -153,7 +155,6 @@ namespace Codegen {
                     sw.WriteLine(@"    }");
                     sw.WriteLine(@"}");
                 }
-
                 Console.WriteLine("Done!");
             } catch (Exception e) {
                 Console.WriteLine(e.Message);
@@ -161,8 +162,6 @@ namespace Codegen {
             }
             return true;
         }
-
-
 
         /// <summary>
         /// Converts a codepoint to unicode surrogate pairs

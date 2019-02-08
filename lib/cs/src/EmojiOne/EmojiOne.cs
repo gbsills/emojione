@@ -1,5 +1,5 @@
 ﻿//  The MIT License (MIT)
-//  Copyright (c) 2016 Linus Birgerstam
+//  Copyright (c) 2019 Linus Birgerstam
 //    
 //  Permission is hereby granted, free of charge, to any person obtaining a copy of
 //  this software and associated documentation files (the "Software"), to deal in
@@ -31,24 +31,24 @@ namespace EmojiOne {
     public static partial class EmojiOne {
 
         /// <summary>
-        /// 
+        /// You can [optionally] modify this to load alternate emoji versions.
         /// </summary>
-        private static string ImagePathPng { get; set; } = "//cdn.jsdelivr.net/emojione/assets/png/";
+        public static string EmojiVersion { get; set; } = "4.0";
 
         /// <summary>
-        /// 
+        /// Default emoji size. Valid values are 32, 64 and 128. 512 is also possible when using local premium assets.
         /// </summary>
-        private static string ImagePathSvg { get; set; } = "//cdn.jsdelivr.net/emojione/assets/svg/";
+        public static int EmojiSize { get; set; } = 32;
 
         /// <summary>
-        /// 
+        /// Defaults to .png. Set to .svg when using local premium assests.
         /// </summary>
-        private static string ImagePathSvgSprites { get; set; } = "./../assets/sprites/emojione.sprites.svg";
+        public static string FileExtension { get; set; } = ".png";
 
         /// <summary>
-        /// You can [optionally] modify this to force browsers to refresh their cache, it will be appended to the end of the filenames.
+        /// Path to png assets.
         /// </summary>
-        internal static string CacheBustParam { get; set; } = "?v=2.2.7";
+        public static string ImagePathPng { get; set; } = "https://cdn.jsdelivr.net/emojione/assets/" + EmojiVersion + "/png/";
 
         /// <summary>
         /// Takes an input string containing both native unicode emoji and shortnames, and translates it into emoji images for display.
@@ -57,13 +57,14 @@ namespace EmojiOne {
         /// <param name="ascii"><c>true</c> to also convert ascii emoji to images.</param>
         /// <param name="unicodeAlt"><c>true</c> to use the unicode char instead of the shortname as the alt attribute (makes copy and pasting the resulting text better).</param>
         /// <param name="svg"><c>true</c> to use output svg markup instead of png</param>
-        /// <param name="sprites"><c>true</c> to enable sprite mode instead of individual images.</param>
+        /// <param name="sprite"><c>true</c> to enable sprite mode instead of individual images.</param>
+        /// <param name="size">Emoji size. If <c>null</c>, <see cref="EmojiSize"/> will be used.</param>
         /// <returns>A string with appropriate html for rendering emoji.</returns>
-        public static string ToImage(string str, bool ascii = false, bool unicodeAlt = true, bool svg = false, bool sprites = false, bool awesome = false) {
+        public static string ToImage(string str, bool ascii = false, bool unicodeAlt = true, bool svg = false, bool sprite = false, int? size = null) {
             // first pass changes unicode characters into emoji markup
-            str = UnicodeToImage(str, unicodeAlt, svg, sprites, awesome);
+            str = UnicodeToImage(str, unicodeAlt, svg, sprite, size);
             // second pass changes any shortnames into emoji markup
-            str = ShortnameToImage(str, ascii, unicodeAlt, svg, sprites, awesome);
+            str = ShortnameToImage(str, ascii, unicodeAlt, svg, sprite, size);
             return str;
         }
 
@@ -98,7 +99,7 @@ namespace EmojiOne {
         }
 
         /// <summary>
-        /// This will replace shortnames with their ascii equivalent, e.g. :wink: -> ;^. 
+        /// This will replace shortnames with their ascii equivalent, e.g. :wink: -> ;). 
         /// This is useful for systems that don't support unicode or images.
         /// </summary>
         /// <param name="str"></param>
@@ -117,14 +118,15 @@ namespace EmojiOne {
         /// <param name="ascii"><c>true</c> to also convert ascii emoji to images.</param>
         /// <param name="unicodeAlt"><c>true</c> to use the unicode char instead of the shortname as the alt attribute (makes copy and pasting the resulting text better).</param>
         /// <param name="svg"><c>true</c> to use output svg markup instead of png</param>
-        /// <param name="sprites"><c>true</c> to enable sprite mode instead of individual images.</param>
+        /// <param name="sprite"><c>true</c> to enable sprite mode instead of individual images.</param>
+        /// <param name="size">Emoji size. If <c>null</c>, <see cref="EmojiSize"/> will be used.</param>
         /// <returns>A string with appropriate html for rendering emoji.</returns>
-        public static string ShortnameToImage(string str, bool ascii = false, bool unicodeAlt = true, bool svg = false, bool sprites = false, bool awesome = false) {
+        public static string ShortnameToImage(string str, bool ascii = false, bool unicodeAlt = true, bool svg = false, bool sprite = false, int? size = null) {
             if (ascii) {
                 str = AsciiToShortname(str);
             }
             if (str != null) {
-                str = Regex.Replace(str, IGNORE_PATTERN + "|" + SHORTNAME_PATTERN, match => ShortnameToImageCallback(match, unicodeAlt, svg, sprites, awesome), RegexOptions.IgnoreCase);
+                str = Regex.Replace(str, IGNORE_PATTERN + "|" + SHORTNAME_PATTERN, match => ShortnameToImageCallback(match, unicodeAlt, svg, sprite, size), RegexOptions.IgnoreCase);
             }
             return str;
         }
@@ -147,11 +149,12 @@ namespace EmojiOne {
         /// <param name="str">The input string</param>
         /// <param name="unicodeAlt"><c>true</c> to use the unicode char instead of the shortname as the alt attribute (makes copy and pasting the resulting text better).</param>
         /// <param name="svg"><c>true</c> to use output svg markup instead of png</param>
-        /// <param name="sprites"><c>true</c> to enable sprite mode instead of individual images.</param>
+        /// <param name="sprite"><c>true</c> to enable sprite mode instead of individual images.</param>
+        /// <param name="size">Emoji size. If <c>null</c>, <see cref="EmojiSize"/> will be used.</param>
         /// <returns>A string with appropriate html for rendering emoji.</returns>
-        public static string UnicodeToImage(string str, bool unicodeAlt = true, bool svg = false, bool sprites = false, bool awesome = false) {
+        public static string UnicodeToImage(string str, bool unicodeAlt = true, bool svg = false, bool sprite = false, int? size = null) {
             if (str != null) {
-                str = Regex.Replace(str, IGNORE_PATTERN + "|" + UNICODE_PATTERN, match => UnicodeToImageCallback(match, unicodeAlt, svg, sprites, awesome));
+                str = Regex.Replace(str, IGNORE_PATTERN + "|" + UNICODE_PATTERN, match => UnicodeToImageCallback(match, unicodeAlt, svg, sprite, size));
             }
             return str;
         }
@@ -204,25 +207,25 @@ namespace EmojiOne {
             return match.Value;
         }
 
-        private static string ShortnameToImageCallback(Match match, bool unicodeAlt, bool svg, bool sprites, bool awesome) {
+        private static string ShortnameToImageCallback(Match match, bool unicodeAlt, bool svg, bool sprite, int? size) {
             // check if the emoji exists in our dictionaries
             var shortname = match.Value;
             if (SHORTNAME_TO_CODEPOINT.ContainsKey(shortname)) {
                 var codepoint = SHORTNAME_TO_CODEPOINT[shortname];
                 string alt = unicodeAlt ? ToUnicode(codepoint) : shortname;
-                if (awesome) {
-                    return string.Format(@"<i class=""e1a-{0}""></i>", shortname.Replace("_", "-").Replace(":", ""));
-                } else if (svg) {
-                    if (sprites) {
-                        return string.Format(@"<svg class=""emojione""><description>{0}</description><use xlink:href=""{1}#emoji-{2}""></use></svg>", unicodeAlt ? alt : shortname, ImagePathSvgSprites, codepoint);
-                    } else {
-                        return string.Format(@"<object class=""emojione"" data=""{0}{1}.svg{2}"" type=""image/svg+xml"" standby=""{3}"">{3}</object>", ImagePathSvg, codepoint, CacheBustParam, unicodeAlt ? alt : shortname);
-                    }
+                if (svg) {
+                    // TODO: inline svg
+                    return null;
+                    //if (sprite) {
+                    //    return string.Format(@"<svg class=""emojione""><description>{0}</description><use xlink:href=""{1}emojione-sprite.svg#emoji-{2}""></use></svg>", unicodeAlt ? alt : shortname, ImagePathSprites, codepoint);
+                    //} else {
+                    //    return string.Format(@"<object class=""emojione"" data=""{0}{1}.svg"" type=""image/svg+xml"" standby=""{2}"">{2}</object>", ImagePathSvg, codepoint, unicodeAlt ? alt : shortname);
+                    //}
                 } else {
-                    if (sprites) {
+                    if (sprite) {
                         return string.Format(@"<span class=""emojione emojione-{0}"" title=""{1}"">{2}</span>", codepoint, shortname, unicodeAlt ? alt : shortname);
                     } else {
-                        return string.Format(@"<img class=""emojione"" alt=""{0}"" src=""{1}{2}.png{3}"" />", unicodeAlt ? alt : shortname, ImagePathPng, codepoint, CacheBustParam);
+                        return string.Format(@"<img class=""emojione"" alt=""{0}"" src=""{1}{2}/{3}.png"" />", unicodeAlt ? alt : shortname, ImagePathPng, size ?? EmojiSize, codepoint);
                     }
                 }
             }
@@ -257,25 +260,25 @@ namespace EmojiOne {
             return match.Value;
         }
 
-        private static string UnicodeToImageCallback(Match match, bool unicodeAlt, bool svg, bool sprites, bool awesome) {
+        private static string UnicodeToImageCallback(Match match, bool unicodeAlt, bool svg, bool sprite, int? size) {
             // check if the emoji exists in our dictionaries
             var codepoint = ToCodePoint(match.Groups[1].Value);
             if (CODEPOINT_TO_SHORTNAME.ContainsKey(codepoint)) {
                 var shortname = CODEPOINT_TO_SHORTNAME[codepoint];
                 string alt = unicodeAlt ? ToUnicode(codepoint) : shortname;
-                if (awesome) {
-                    return string.Format(@"<i class=""e1a-{0}""></i>", shortname.Replace("_", "-").Replace(":", ""));
-                } else if (svg) {
-                    if (sprites) {
-                        return string.Format(@"<svg class=""emojione""><description>{0}</description><use xlink:href=""{1}#emoji-{2}""></use></svg>", unicodeAlt ? alt : shortname, ImagePathSvgSprites, codepoint);
-                    } else {
-                        return string.Format(@"<object class=""emojione"" data=""{0}{1}.svg{2}"" type=""image/svg+xml"" standby=""{3}"">{3}</object>", ImagePathSvg, codepoint, CacheBustParam, unicodeAlt ? alt : shortname);
-                    }
+                if (svg) {
+                    // TODO: inline svg
+                    return null;
+                    //if (sprite) {
+                    //    return string.Format(@"<svg class=""emojione""><description>{0}</description><use xlink:href=""{1}emojione-sprite.svg#emoji-{2}""></use></svg>", unicodeAlt ? alt : shortname, ImagePathSprites, codepoint);
+                    //} else {
+                    //    return string.Format(@"<object class=""emojione"" data=""{0}{1}.svg"" type=""image/svg+xml"" standby=""{2}"">{2}</object>", ImagePathSvg, codepoint, unicodeAlt ? alt : shortname);
+                    //}
                 } else {
-                    if (sprites) {
+                    if (sprite) {
                         return string.Format(@"<span class=""emojione emojione-{0}"" title=""{1}"">{2}</span>", codepoint, shortname, unicodeAlt ? alt : shortname);
                     } else {
-                        return string.Format(@"<img class=""emojione"" alt=""{0}"" src=""{1}{2}.png{3}"" />", unicodeAlt ? alt : shortname, ImagePathPng, codepoint, CacheBustParam);
+                        return string.Format(@"<img class=""emojione"" alt=""{0}"" src=""{1}{2}/{3}.png"" />", unicodeAlt ? alt : shortname, ImagePathPng, size ?? EmojiSize, codepoint);
                     }
                 }
             }

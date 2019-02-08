@@ -20,7 +20,7 @@ namespace EmojiOne.Tests {
             Assert.AreEqual(expected, actual);
 
             // multiple smileys
-            text = ";) :p :* :)";
+            text = ";) :P :* :)";
             expected = "😉 😛 😘 🙂";
             actual = EmojiOne.AsciiToUnicode(text);
             Assert.AreEqual(expected, actual);
@@ -50,13 +50,7 @@ namespace EmojiOne.Tests {
             Assert.AreEqual(expected, actual);
 
             // smiley inside of an IMG tag (shouldn't convert anything inside of the tag)
-            text = @"Smile <img class=""emojione"" alt="":)"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f604.png"" /> because it's going to be a good day.";
-            expected = text;
-            actual = EmojiOne.AsciiToUnicode(text);
-            Assert.AreEqual(expected, actual);
-
-            // smiley inside of OBJECT tag  (shouldn't convert anything inside of the tag)
-            text = @"Smile <object class=""emojione"" data=""//cdn.jsdelivr.net/emojione/assets/svg/1f604.svg"" type=""image/svg+xml"" standby="":)"">:)</object> because it's going to be a good day.";
+            text = $@"Smile <img class=""emojione"" alt="":)"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f604.png"" /> because it's going to be a good day.";
             expected = text;
             actual = EmojiOne.AsciiToUnicode(text);
             Assert.AreEqual(expected, actual);
@@ -79,37 +73,37 @@ namespace EmojiOne.Tests {
         public void ShortnameToImage() {
             // shortname to image
             string text = "Hello world! 😄 :smile:";
-            string expected = $@"Hello world! 😄 <img class=""emojione"" alt=""😄"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f604.png{EmojiOne.CacheBustParam}"" />";
+            string expected = $@"Hello world! 😄 <img class=""emojione"" alt=""😄"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f604.png"" />";
             string actual = EmojiOne.ShortnameToImage(text);
             Assert.AreEqual(expected, actual);
 
             // shortname at start of sentence with apostrophe
             text = ":snail:'s are cool!";
-            expected = $@"<img class=""emojione"" alt=""🐌"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f40c.png{EmojiOne.CacheBustParam}"" />'s are cool!";
+            expected = $@"<img class=""emojione"" alt=""🐌"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f40c.png"" />'s are cool!";
             actual = EmojiOne.ShortnameToImage(text);
             Assert.AreEqual(expected, actual);
 
             // shortname shares a colon
             text = ":invalid:snail:";
-            expected = $@":invalid<img class=""emojione"" alt=""🐌"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f40c.png{EmojiOne.CacheBustParam}"" />";
+            expected = $@":invalid<img class=""emojione"" alt=""🐌"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f40c.png"" />";
             actual = EmojiOne.ShortnameToImage(text);
             Assert.AreEqual(expected, actual);
 
             // mixed ascii, regular unicode and duplicate emoji
             text = ":alien: is 👽 and 저 is not :alien: or :alien: also :randomy: is not emoji";
-            expected = $@"<img class=""emojione"" alt=""👽"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f47d.png{EmojiOne.CacheBustParam}"" /> is 👽 and 저 is not <img class=""emojione"" alt=""👽"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f47d.png{EmojiOne.CacheBustParam}"" /> or <img class=""emojione"" alt=""👽"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f47d.png{EmojiOne.CacheBustParam}"" /> also :randomy: is not emoji";
+            expected = $@"<img class=""emojione"" alt=""👽"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f47d.png"" /> is 👽 and 저 is not <img class=""emojione"" alt=""👽"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f47d.png"" /> or <img class=""emojione"" alt=""👽"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f47d.png"" /> also :randomy: is not emoji";
             actual = EmojiOne.ShortnameToImage(text);
             Assert.AreEqual(expected, actual);
 
             // multiline emoji string
             text = ":dancer:\n:dancer:";
-            expected = $"<img class=\"emojione\" alt=\"💃\" src=\"//cdn.jsdelivr.net/emojione/assets/png/1f483.png{EmojiOne.CacheBustParam}\" />\n<img class=\"emojione\" alt=\"💃\" src=\"//cdn.jsdelivr.net/emojione/assets/png/1f483.png{EmojiOne.CacheBustParam}\" />";
+            expected = $"<img class=\"emojione\" alt=\"💃\" src=\"{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f483.png\" />\n<img class=\"emojione\" alt=\"💃\" src=\"{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f483.png\" />";
             actual = EmojiOne.ShortnameToImage(text);
             Assert.AreEqual(expected, actual);
 
             // triple emoji string
             text = ":dancer::dancer::alien:";
-            expected = $@"<img class=""emojione"" alt=""💃"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f483.png{EmojiOne.CacheBustParam}"" /><img class=""emojione"" alt=""💃"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f483.png{EmojiOne.CacheBustParam}"" /><img class=""emojione"" alt=""👽"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f47d.png{EmojiOne.CacheBustParam}"" />";
+            expected = $@"<img class=""emojione"" alt=""💃"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f483.png"" /><img class=""emojione"" alt=""💃"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f483.png"" /><img class=""emojione"" alt=""👽"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f47d.png"" />";
             actual = EmojiOne.ShortnameToImage(text);
             Assert.AreEqual(expected, actual);
         }
@@ -129,8 +123,8 @@ namespace EmojiOne.Tests {
             Assert.AreEqual(expected, actual);
 
             // shortname mid sentence with a comma
-            text = "The :snail:, is Emoji One's official mascot.";
-            expected = "The 🐌, is Emoji One's official mascot.";
+            text = "The :unicorn:, is Emoji One's official mascot.";
+            expected = "The 🦄, is Emoji One's official mascot.";
             actual = EmojiOne.ShortnameToUnicode(text);
             Assert.AreEqual(expected, actual);
 
@@ -171,38 +165,32 @@ namespace EmojiOne.Tests {
             Assert.AreEqual(expected, actual);
 
             // shortname at end of sentence
-            text = "Emoji One's official mascot is :snail:.";
-            expected = "Emoji One's official mascot is 🐌.";
+            text = "Emoji One's official mascot is :unicorn:.";
+            expected = "Emoji One's official mascot is 🦄.";
             actual = EmojiOne.ShortnameToUnicode(text);
             Assert.AreEqual(expected, actual);
 
             // shortname at end of sentence with alternate punctuation
-            text = "Emoji One's official mascot is :snail:!";
-            expected = "Emoji One's official mascot is 🐌!";
+            text = "Emoji One's official mascot is :unicorn:!";
+            expected = "Emoji One's official mascot is 🦄!";
             actual = EmojiOne.ShortnameToUnicode(text);
             Assert.AreEqual(expected, actual);
 
             // shortname at end of sentence with preceeding colon
-            text = "Emoji One's official mascot: :snail:";
-            expected = "Emoji One's official mascot: 🐌";
+            text = "Emoji One's official mascot: :unicorn:";
+            expected = "Emoji One's official mascot: 🦄";
             actual = EmojiOne.ShortnameToUnicode(text);
             Assert.AreEqual(expected, actual);
 
             // shortname inside of IMG tag
-            text = @"The <img class=""emojione"" alt="":snail:"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f40c.png"" /> is Emoji One's official mascot.";
-            expected = text;
-            actual = EmojiOne.ShortnameToUnicode(text);
-            Assert.AreEqual(expected, actual);
-
-            // shortname inside of OBJECT tag
-            text = @"The <object class=""emojione"" data=""//cdn.jsdelivr.net/emojione/assets/svg/1f40c.svg"" type=""image/svg+xml"" standby="":snail:"">:snail:</object> is Emoji One's official mascot.";
+            text = $@"The <img class=""emojione"" alt="":unicorn:"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f984.png"" /> is Emoji One's official mascot.";
             expected = text;
             actual = EmojiOne.ShortnameToUnicode(text);
             Assert.AreEqual(expected, actual);
 
             // shortname to unicode with code pairs
             text = ":nine:";
-            expected = "9⃣";
+            expected = "9️⃣";
             actual = EmojiOne.ShortnameToUnicode(text);
             Assert.AreEqual(expected, actual);
 
@@ -246,14 +234,14 @@ namespace EmojiOne.Tests {
             Assert.AreEqual(expected, actual);
 
             // character mid sentence
-            text = "The 🐌 is Emoji One's official mascot.";
-            expected = "The :snail: is Emoji One's official mascot.";
+            text = "The 🦄 is Emoji One's official mascot.";
+            expected = "The :unicorn: is Emoji One's official mascot.";
             actual = EmojiOne.ToShort(text);
             Assert.AreEqual(expected, actual);
 
             // character mid sentence with a comma
-            text = "The 🐌, is Emoji One's official mascot.";
-            expected = "The :snail:, is Emoji One's official mascot.";
+            text = "The 🦄, is Emoji One's official mascot.";
+            expected = "The :unicorn:, is Emoji One's official mascot.";
             actual = EmojiOne.ToShort(text);
             Assert.AreEqual(expected, actual);
 
@@ -270,31 +258,25 @@ namespace EmojiOne.Tests {
             Assert.AreEqual(expected, actual);
 
             // character at end of sentence
-            text = "Emoji One's official mascot is 🐌.";
-            expected = "Emoji One's official mascot is :snail:.";
+            text = "Emoji One's official mascot is 🦄.";
+            expected = "Emoji One's official mascot is :unicorn:.";
             actual = EmojiOne.ToShort(text);
             Assert.AreEqual(expected, actual);
 
             // character at end of sentence with alternate puncuation
-            text = "Emoji One's official mascot is 🐌!";
-            expected = "Emoji One's official mascot is :snail:!";
+            text = "Emoji One's official mascot is 🦄!";
+            expected = "Emoji One's official mascot is :unicorn:!";
             actual = EmojiOne.ToShort(text);
             Assert.AreEqual(expected, actual);
 
             // character at end of sentence with preceeding colon
-            text = "Emoji One's official mascot: 🐌";
-            expected = "Emoji One's official mascot: :snail:";
+            text = "Emoji One's official mascot: 🦄";
+            expected = "Emoji One's official mascot: :unicorn:";
             actual = EmojiOne.ToShort(text);
             Assert.AreEqual(expected, actual);
 
             // character inside of IMG tag
-            text = @"The <img class=""emojione"" alt=""🐌"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f40c.png"" /> is Emoji One's official mascot.";
-            expected = text;
-            actual = EmojiOne.ToShort(text);
-            Assert.AreEqual(expected, actual);
-
-            // characters inside of OBJECT tag
-            text = @"The <object class=""emojione"" data=""//cdn.jsdelivr.net/emojione/assets/svg/1f40c.svg"" type=""image/svg+xml"" standby=""🐌"">🐌</object> is Emoji One's official mascot.";
+            text = $@"The <img class=""emojione"" alt=""🦄"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f984.png"" /> is Emoji One's official mascot.";
             expected = text;
             actual = EmojiOne.ToShort(text);
             Assert.AreEqual(expected, actual);
@@ -349,68 +331,56 @@ namespace EmojiOne.Tests {
         public void ToImage() {
             // to image
             string text = "Hello world! 😄 :smile:";
-            string expected = $@"Hello world! <img class=""emojione"" alt=""😄"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f604.png{EmojiOne.CacheBustParam}"" /> <img class=""emojione"" alt=""😄"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f604.png{EmojiOne.CacheBustParam}"" />";
+            string expected = $@"Hello world! <img class=""emojione"" alt=""😄"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f604.png"" /> <img class=""emojione"" alt=""😄"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f604.png"" />";
             string actual = EmojiOne.ToImage(text);
             Assert.AreEqual(expected, actual);
 
             // mixed ascii, regular unicode and duplicate emoji
             text = ":alien: is 👽 and 저 is not :alien: or :alien: also :randomy: is not emoji";
-            expected = $@"<img class=""emojione"" alt=""👽"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f47d.png{EmojiOne.CacheBustParam}"" /> is <img class=""emojione"" alt=""👽"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f47d.png{EmojiOne.CacheBustParam}"" /> and 저 is not <img class=""emojione"" alt=""👽"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f47d.png{EmojiOne.CacheBustParam}"" /> or <img class=""emojione"" alt=""👽"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f47d.png{EmojiOne.CacheBustParam}"" /> also :randomy: is not emoji";
+            expected = $@"<img class=""emojione"" alt=""👽"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f47d.png"" /> is <img class=""emojione"" alt=""👽"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f47d.png"" /> and 저 is not <img class=""emojione"" alt=""👽"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f47d.png"" /> or <img class=""emojione"" alt=""👽"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f47d.png"" /> also :randomy: is not emoji";
             actual = EmojiOne.ToImage(text);
             Assert.AreEqual(expected, actual);
 
             // single shortname conversion
             text = ":snail:";
-            expected = $@"<img class=""emojione"" alt=""🐌"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f40c.png{EmojiOne.CacheBustParam}"" />";
+            expected = $@"<img class=""emojione"" alt=""🐌"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f40c.png"" />";
             actual = EmojiOne.ToImage(text);
             Assert.AreEqual(expected, actual);
 
             // shortname shares a colon
             text = ":invalid:snail:";
-            expected = $@":invalid<img class=""emojione"" alt=""🐌"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f40c.png{EmojiOne.CacheBustParam}"" />";
+            expected = $@":invalid<img class=""emojione"" alt=""🐌"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f40c.png"" />";
             actual = EmojiOne.ToImage(text);
             Assert.AreEqual(expected, actual);
 
             // single unicode character conversion
             text = "🐌";
-            expected = $@"<img class=""emojione"" alt=""🐌"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f40c.png{EmojiOne.CacheBustParam}"" />";
+            expected = $@"<img class=""emojione"" alt=""🐌"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f40c.png"" />";
             actual = EmojiOne.ToImage(text);
             Assert.AreEqual(expected, actual);
 
             // mixed unicode, shortname and ascii conversion
             text = "😄 :smile: :)";
-            expected = $@"<img class=""emojione"" alt=""😄"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f604.png{EmojiOne.CacheBustParam}"" /> <img class=""emojione"" alt=""😄"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f604.png{EmojiOne.CacheBustParam}"" /> <img class=""emojione"" alt=""🙂"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f642.png{EmojiOne.CacheBustParam}"" />";
+            expected = $@"<img class=""emojione"" alt=""😄"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f604.png"" /> <img class=""emojione"" alt=""😄"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f604.png"" /> <img class=""emojione"" alt=""🙂"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f642.png"" />";
             actual = EmojiOne.ToImage(text, ascii: true);
             Assert.AreEqual(expected, actual);
 
             // shortname alt
             text = "😄";
-            expected = $@"<img class=""emojione"" alt="":smile:"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f604.png{EmojiOne.CacheBustParam}"" />";
+            expected = $@"<img class=""emojione"" alt="":smile:"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f604.png"" />";
             actual = EmojiOne.ToImage(text, unicodeAlt: false);
             Assert.AreEqual(expected, actual);
 
             // svg conversion
             text = "😄";
-            expected = $@"<object class=""emojione"" data=""//cdn.jsdelivr.net/emojione/assets/svg/1f604.svg{EmojiOne.CacheBustParam}"" type=""image/svg+xml"" standby=""😄"">😄</object>";
+            expected = $@"<svg class=""emojione"">TODO: inline svg markup</svg>";
             actual = EmojiOne.ToImage(text, svg: true);
             Assert.AreEqual(expected, actual);
 
-            // png sprite
+            // sprite
             text = "😄";
             expected = @"<span class=""emojione emojione-1f604"" title="":smile:"">😄</span>";
-            actual = EmojiOne.ToImage(text, sprites: true);
-            Assert.AreEqual(expected, actual);
-
-            // svg sprite
-            text = "😄";
-            expected = @"<svg class=""emojione""><description>😄</description><use xlink:href=""./../assets/sprites/emojione.sprites.svg#emoji-1f604""></use></svg>";
-            actual = EmojiOne.ToImage(text, svg: true, sprites: true);
-            Assert.AreEqual(expected, actual);
-
-            // emojione-awesome
-            text = "😄";
-            expected = @"<i class=""e1a-smile""></i>";
-            actual = EmojiOne.ToImage(text, awesome: true);
+            actual = EmojiOne.ToImage(text, sprite: true);
             Assert.AreEqual(expected, actual);
         }
 
@@ -498,7 +468,7 @@ namespace EmojiOne.Tests {
         public void Version224Emoji() {
             // test that new emoji from v2.2.4 works
             string text = ":first_place:";
-            string expected = $@"<img class=""emojione"" alt=""🥇"" src=""//cdn.jsdelivr.net/emojione/assets/png/1f947.png{EmojiOne.CacheBustParam}"" />";
+            string expected = $@"<img class=""emojione"" alt=""🥇"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f947.png"" />";
             string actual = EmojiOne.ShortnameToImage(text);
             Assert.AreEqual(expected, actual);
 
@@ -510,6 +480,25 @@ namespace EmojiOne.Tests {
             text = "🖤";
             expected = ":black_heart:";
             actual = EmojiOne.ToShort(text);
+            Assert.AreEqual(expected, actual);
+        }
+
+        [TestMethod]
+        public void Version40Emoji() {
+            // test that new emoji from v4.0 works
+            string text = ":cold_face:";
+            string expected = $@"<img class=""emojione"" alt=""🥶"" src=""{EmojiOne.ImagePathPng}{EmojiOne.EmojiSize}/1f976.png"" />";
+            string actual = EmojiOne.ShortnameToImage(text);
+            Assert.AreEqual(expected, actual);
+
+            text = "🧁";
+            expected = ":cupcake:";
+            actual = EmojiOne.ToShort(text);
+            Assert.AreEqual(expected, actual);
+
+            text = ":superhero:";
+            expected = "🦸";
+            actual = EmojiOne.ShortnameToUnicode(text);
             Assert.AreEqual(expected, actual);
         }
 

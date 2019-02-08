@@ -1,6 +1,6 @@
 # EmojiOne utility for C# 
 
-A C# implementation of [EmojiOne](https://github.com/Ranks/emojione) for converting Unicode emoji characters to :shortnames: and :shortnames: to emoji images etc. 
+A C# implementation of [EmojiOne](https://github.com/emojione/emojione) for converting Unicode emoji characters to :shortnames: and :shortnames: to emoji images etc. 
 
 ## Installation
 
