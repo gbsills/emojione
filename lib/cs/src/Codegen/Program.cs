@@ -152,6 +152,19 @@ namespace Codegen {
                     }
                     sw.WriteLine();
                     sw.WriteLine(@"        };");
+                    sw.WriteLine();
+                    sw.WriteLine(@"        private static readonly Dictionary<string, string> SHORTNAME_TO_CATEGORY = new Dictionary<string, string> {");
+                    for (int i = 0; i < emojis.Count; i++) {
+                        var emoji = emojis.ElementAt(i).Value;
+                        sw.Write(@"            [""{0}""] = ""{1}""", emoji.Shortname, emoji.Category);
+                        if (i < emojis.Count - 1) {
+                            sw.WriteLine(",");
+                        }
+                    }
+                    sw.WriteLine();
+                    sw.WriteLine(@"        };");
+                    sw.WriteLine();
+
                     sw.WriteLine(@"    }");
                     sw.WriteLine(@"}");
                 }
