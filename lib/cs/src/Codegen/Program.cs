@@ -46,6 +46,13 @@ namespace Codegen {
                 string json = File.ReadAllText(EmojiFile);
                 var emojis = JsonConvert.DeserializeObject<Dictionary<string, Emoji>>(json);
 
+                // remove ascii symbols and digits
+                string chars = @"0123456789#*";
+                foreach (char c in chars) {
+                    var codepoint = ToCodePoint(c.ToString());
+                    emojis.Remove(codepoint);
+                }
+
                 // write regex patternas and dictionaries to partial class
                 Directory.CreateDirectory(SourceDir);
                 file = new FileInfo(Path.Combine(SourceDir, "EmojiOne.generated.cs"));
@@ -178,6 +185,24 @@ namespace Codegen {
             }
             return true;
         }
+
+
+        /// <summary>
+        /// Convert a unicode character to its code point/code pair(s)
+        /// </summary>
+        /// <param name="unicode"></param>
+        /// <returns></returns>
+        private string ToCodePoint(string unicode) {
+            string codepoint = "";
+            for (var i = 0; i < unicode.Length; i += char.IsSurrogatePair(unicode, i) ? 2 : 1) {
+                if (i > 0) {
+                    codepoint += "-";
+                }
+                codepoint += string.Format("{0:X4}", char.ConvertToUtf32(unicode, i));
+            }
+            return codepoint.ToLower();
+        }
+
 
         /// <summary>
         /// Converts a codepoint to unicode surrogate pairs

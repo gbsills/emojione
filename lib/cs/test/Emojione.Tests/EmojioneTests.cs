@@ -421,11 +421,11 @@ namespace EmojiOne.Tests {
         }
 
         [TestMethod]
-        public void NumberShouldNotBeConvertedToShortname() {
-            string text = "2";
-            string notexpected = ":digit_two:";
+        public void AsciiSymbolsAndDigits() {
+            string text = @" !""#$%&'()*+,-./0123456789:;<=>?@";
+            string expected = @" !""#$%&'()*+,-./0123456789:;<=>?@";
             string actual = EmojiOne.ToShort(text);
-            Assert.AreNotEqual(notexpected, actual);
+            Assert.AreEqual(expected, actual);
         }
 
         [TestMethod]
