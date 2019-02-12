@@ -53,7 +53,7 @@ namespace Codegen {
                     emojis.Remove(codepoint);
                 }
 
-                // write regex patternas and dictionaries to partial class
+                // write regex patterns and dictionaries to partial class
                 Directory.CreateDirectory(SourceDir);
                 file = new FileInfo(Path.Combine(SourceDir, "EmojiOne.generated.cs"));
                 Console.WriteLine("Writing code to " + file.FullName);
