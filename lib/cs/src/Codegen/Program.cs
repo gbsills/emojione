@@ -5,18 +5,34 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace Codegen {
 
     public class Program {
+
+        // xml writer settings
+        private XmlWriterSettings _settings = new XmlWriterSettings { Encoding = Encoding.UTF8, Indent = false, NamespaceHandling = NamespaceHandling.OmitDuplicates, OmitXmlDeclaration = true };
 
         /// <summary>
         /// Path to the emoji.json file.
         /// </summary>
         public string EmojiFile { get; set; } = "../../../../../../emoji.json";
 
+        /// <summary>
+        /// Path where generated source file will be created.
+        /// </summary>
         public string SourceDir { get; set; } = "../../../EmojiOne";
 
+        /// <summary>
+        /// Path to premium svg assets.
+        /// </summary>
+        public string SvgDir { get; set; } = "../../../../assets";
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args"></param>
         public static void Main(string[] args) {
             var program = new Program();
             program.Execute();
@@ -35,6 +51,17 @@ namespace Codegen {
                 string json = File.ReadAllText(EmojiFile);
                 var emojis = JsonConvert.DeserializeObject<Dictionary<string, Emoji>>(json);
 
+                // load svgs from disk (it's a good idea to run them through SvgCleaner first, see https://github.com/RazrFalcon/svgcleaner-gui)
+                if (Directory.Exists(SvgDir)) {
+                    foreach (var emoji in emojis.Values) {
+                        var path = Path.Combine(SvgDir, emoji.CodePoints.Base + ".svg");
+                        if (File.Exists(path)) {
+                            // keep only width, height and viewBox attributes
+                            emoji.Svg = RemoveAttributes(File.ReadAllText(path), "width", "height", "viewBox");
+                        }
+                    }
+                }
+
                 // write regex patternas and dictionaries to partial class
                 Directory.CreateDirectory(SourceDir);
                 file = new FileInfo(Path.Combine(SourceDir, "EmojiOne.generated.cs"));
@@ -45,6 +72,14 @@ namespace Codegen {
                     sw.WriteLine(@"namespace EmojiOne {");
                     sw.WriteLine();
                     sw.WriteLine(@"    public static partial class EmojiOne {");
+                    sw.WriteLine();
+                    sw.WriteLine(@"        private const int SHORTNAME_INDEX = 0;");
+                    sw.WriteLine();
+                    sw.WriteLine(@"        private const int CATEGORY_INDEX = 1;");
+                    sw.WriteLine();
+                    sw.WriteLine(@"        private const int ASCII_INDEX = 2;");
+                    sw.WriteLine();
+                    sw.WriteLine(@"        private const int SVG_INDEX = 3;");
                     sw.WriteLine();
                     var asciis = emojis.Values.Where(x => x.Ascii.Any());
                     sw.Write(@"        private const string ASCII_PATTERN = @""(?<=\s|^)(");
@@ -90,11 +125,11 @@ namespace Codegen {
                     }
                     sw.WriteLine(@")"";");
                     sw.WriteLine();
-                    sw.WriteLine(@"        private static readonly Dictionary<string, string> ASCII_TO_CODEPOINT = new Dictionary<string, string> {");
+                    sw.WriteLine(@"        private static readonly Dictionary<string, string> ASCII = new Dictionary<string, string> {");
                     for (int i = 0; i < asciis.Count(); i++) {
                         var emoji = asciis.ElementAt(i);
                         for (int j = 0; j < emoji.Ascii.Length; j++) {
-                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.Ascii[j].Replace("\\", "\\\\"), emoji.CodePoints.Output.ToLower());
+                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.Ascii[j].Replace("\\", "\\\\"), emoji.CodePoints.Base);
                             if (j < emoji.Ascii.Length - 1) {
                                 sw.WriteLine(",");
                             }
@@ -106,45 +141,13 @@ namespace Codegen {
                     sw.WriteLine();
                     sw.WriteLine(@"        };");
                     sw.WriteLine();
-                    sw.WriteLine(@"        private static readonly Dictionary<string, string> CODEPOINT_TO_ASCII = new Dictionary<string, string> {");
-                    for (int i = 0; i < asciis.Count(); i++) {
-                        var emoji = asciis.ElementAt(i);
-                        for (int j = 0; j < emoji.CodePoints.BaseAndDefaultMatches.Length; j++) {
-                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.CodePoints.BaseAndDefaultMatches[j].ToLower(), emoji.Ascii.First().Replace("\\", "\\\\"));
-                            if (j < emoji.CodePoints.BaseAndDefaultMatches.Length - 1) {
-                                sw.WriteLine(",");
-                            }
-                        }
-                        if (i < asciis.Count() - 1) {
-                            sw.WriteLine(",");
-                        }
-                    }
-                    sw.WriteLine();
-                    sw.WriteLine(@"        };");
-                    sw.WriteLine();
-                    sw.WriteLine(@"        private static readonly Dictionary<string, string> CODEPOINT_TO_SHORTNAME = new Dictionary<string, string> {");
+                    sw.WriteLine(@"        private static readonly Dictionary<string, string> SHORTNAMES = new Dictionary<string, string> {");
                     for (int i = 0; i < emojis.Count; i++) {
                         var emoji = emojis.ElementAt(i).Value;
-                        for (int j = 0; j < emoji.CodePoints.BaseAndDefaultMatches.Length; j++) {
-                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.CodePoints.BaseAndDefaultMatches[j].ToLower(), emoji.Shortname);
-                            if (j < emoji.CodePoints.BaseAndDefaultMatches.Length - 1) {
-                                sw.WriteLine(",");
-                            }
-                        }
-                         if (i < emojis.Count - 1) {
-                            sw.WriteLine(",");
-                        }
-                    }
-                    sw.WriteLine();
-                    sw.WriteLine(@"        };");
-                    sw.WriteLine();
-                    sw.WriteLine(@"        private static readonly Dictionary<string, string> SHORTNAME_TO_CODEPOINT = new Dictionary<string, string> {");
-                    for (int i = 0; i < emojis.Count; i++) {
-                        var emoji = emojis.ElementAt(i).Value;
-                        sw.Write(@"            [""{0}""] = ""{1}""", emoji.Shortname, emoji.CodePoints.Output.ToLower());
+                        sw.Write(@"            [""{0}""] = ""{1}""", emoji.Shortname, emoji.CodePoints.Base);
                         for (int j = 0; j < emoji.ShortnameAlternates.Length; j++) {
                             sw.WriteLine(",");
-                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.ShortnameAlternates[j], emoji.CodePoints.Output.ToLower());
+                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.ShortnameAlternates[j], emoji.CodePoints.Base);
                         }
                         if (i < emojis.Count - 1) {
                             sw.WriteLine(",");
@@ -153,10 +156,28 @@ namespace Codegen {
                     sw.WriteLine();
                     sw.WriteLine(@"        };");
                     sw.WriteLine();
-                    sw.WriteLine(@"        private static readonly Dictionary<string, string> SHORTNAME_TO_CATEGORY = new Dictionary<string, string> {");
+                    sw.WriteLine(@"        private static readonly Dictionary<string, string> ALTERNATES = new Dictionary<string, string> {");
+                    var alternates = emojis.Values.Where(x => x.CodePoints.AlternateMatches.Any());
+                    for (int i = 0; i < alternates.Count(); i++) {
+                        var emoji = alternates.ElementAt(i);
+                        for (int j = 0; j < emoji.CodePoints.AlternateMatches.Length; j++) {
+                            sw.Write(@"            [""{0}""] = ""{1}""", emoji.CodePoints.AlternateMatches[j], emoji.CodePoints.Base);
+                            if (j < emoji.CodePoints.AlternateMatches.Length - 1) {
+                                sw.WriteLine(",");
+                            }
+                        }
+                        if (i < alternates.Count() - 1) {
+                            sw.WriteLine(",");
+                        }
+                    }
+                    sw.WriteLine();
+                    sw.WriteLine(@"        };");
+                    sw.WriteLine();
+                    sw.WriteLine(@"        private static readonly Dictionary<string, string[]> EMOJI = new Dictionary<string, string[]> {");
+
                     for (int i = 0; i < emojis.Count; i++) {
                         var emoji = emojis.ElementAt(i).Value;
-                        sw.Write(@"            [""{0}""] = ""{1}""", emoji.Shortname, emoji.Category);
+                        sw.Write($@"            [""{emoji.CodePoints.Base}""] = new string[] {{""{emoji.Shortname}"", ""{emoji.Category}"", {(emoji.Ascii.Any() ? $@"""{emoji.Ascii.First().Replace("\\", "\\\\")}""" : "null")}, {(emoji.Svg != null ? $@"@""{emoji.Svg.Replace(@"""", @"""""")}""" : "null")}}}");
                         if (i < emojis.Count - 1) {
                             sw.WriteLine(",");
                         }
@@ -222,10 +243,52 @@ namespace Codegen {
             }
         }
 
+        /// <summary>
+        /// Removes all attributes except those specified in <paramref name="attributes"/>.
+        /// </summary>
+        /// <param name="svg"></param>
+        /// <param name="attributes">
+        /// Name of attributes to keep, or <c>null</c> to keep all attributes. A good default is "width", "height" and "viewBox"
+        /// (according to https://stackoverflow.com/a/34249810/891843 it is safe to remove "xmlns", "xmlns:xlink" and "version" for inline svgs).
+        /// </param>
+        /// <returns></returns>
+        private string RemoveAttributes(string svg, params string[] attributes) {
 
+            var doc = new XmlDocument();
+            doc.LoadXml(svg);
+
+            doc.PreserveWhitespace = false;
+            if (doc.DocumentType != null) {
+                doc.RemoveChild(doc.DocumentType);
+            }
+
+            if (attributes != null && attributes.Length > 0) {
+                // only keep specified attributes
+                var remove = new List<XmlAttribute>();
+                for (int i = 0; i < doc.DocumentElement.Attributes.Count; i++) {
+                    var attr = doc.DocumentElement.Attributes[i];
+                    if (!attributes.Any(x => attr.Name.Equals(x, System.StringComparison.OrdinalIgnoreCase))) {
+                        remove.Add(attr);
+                    }
+                }
+                foreach (var a in remove) {
+                    doc.DocumentElement.Attributes.Remove(a);
+                }
+            }
+
+            StringBuilder sb = new StringBuilder();
+            using (XmlWriter xw = XmlWriter.Create(sb, _settings)) {
+                doc.Save(xw);
+            }
+
+            svg = sb.ToString();
+            if (!attributes.Contains("xmlns")) {
+                // since we can't seem to remove the "root" namespace (xmlns="http://www.w3.org/2000/svg") from the XmlDocument we take care of it with a simple string replacement instead
+                svg = svg.Replace(@" xmlns=""http://www.w3.org/2000/svg""", "");
+            }
+            return svg;
+        }
     }
-
-
 }
 
 

@@ -30,8 +30,6 @@ namespace EmojiOne {
     /// </summary>
     public static partial class EmojiOne {
 
-
-
         /// <summary>
         /// Used only to direct CDN path for non-sprite PNG usage. Available options are 32, 64, and 128.
         /// </summary>
@@ -68,7 +66,6 @@ namespace EmojiOne {
         /// <param name="str">The input string.</param>
         /// <param name="ascii"><c>true</c> to also convert ascii emoji to images.</param>
         /// <param name="unicodeAlt"><c>true</c> to use the unicode char instead of the shortname as the alt attribute (makes copy and pasting the resulting text better).</param>
-        /// <param name="svg"><c>true</c> to output svg markup instead of png</param>
         /// <param name="sprite"><c>true</c> to enable sprite mode instead of individual images.</param>
         /// <returns>A string with appropriate html for rendering emoji.</returns>
         public static string ToImage(string str, bool ascii = false, bool unicodeAlt = true, bool sprite = false) {
@@ -102,11 +99,11 @@ namespace EmojiOne {
         public static string ShortnameToUnicode(string str, bool ascii = false) {
             if (str != null) {
                 str = Regex.Replace(str, IGNORE_PATTERN + "|" + SHORTNAME_PATTERN, match => {
-                    // check if the emoji exists in our dictionary
                     var shortname = match.Value;
-                    if (SHORTNAME_TO_CODEPOINT.ContainsKey(shortname)) {
+                    // check if the emoji exists in our dictionary
+                    if (SHORTNAMES.ContainsKey(shortname)) {
                         // convert codepoint to unicode char
-                        return ToUnicode(SHORTNAME_TO_CODEPOINT[shortname]);
+                        return ToUnicode(SHORTNAMES[shortname]);
                     }
 
                     // we didn't find a replacement so just return the entire match
@@ -129,12 +126,15 @@ namespace EmojiOne {
         public static string ShortnameToAscii(string str) {
             if (str != null) {
                 str = Regex.Replace(str, IGNORE_PATTERN + "|" + SHORTNAME_PATTERN, match => {
-                    // check if the emoji exists in our dictionaries
                     var shortname = match.Value;
-                    if (SHORTNAME_TO_CODEPOINT.ContainsKey(shortname)) {
-                        var codepoint = SHORTNAME_TO_CODEPOINT[shortname];
-                        if (CODEPOINT_TO_ASCII.ContainsKey(codepoint)) {
-                            return CODEPOINT_TO_ASCII[codepoint];
+                    // check if the emoji exists in our dictionary
+                    if (SHORTNAMES.ContainsKey(shortname)) {
+                        var emoji = GetEmoji(SHORTNAMES[shortname]);
+                        if (emoji != null) {
+                            var ascii = emoji[ASCII_INDEX];
+                            if (ascii != null) {
+                                return ascii;
+                            }
                         }
                     }
 
@@ -162,16 +162,19 @@ namespace EmojiOne {
                 str = Regex.Replace(str, IGNORE_PATTERN + "|" + SHORTNAME_PATTERN, match => {
                     var shortname = match.Value;
                     // check if the emoji exists in our dictionary
-                    if (SHORTNAME_TO_CODEPOINT.ContainsKey(shortname)) {
-                        var codepoint = SHORTNAME_TO_CODEPOINT[shortname];
-                        string title = ImageTitleTag ? $@" title=""{shortname}""" : "";
-                        string alt = unicodeAlt ? ToUnicode(codepoint) : shortname;
-                        if (sprite) {
-                            string category = codepoint.IndexOf("-1f3f") >= 0 ? "diversity" : SHORTNAME_TO_CATEGORY[shortname];
-                            return string.Format($@"<span class=""emojione emojione-{EmojiSize}-{category} _{codepoint}""{title}>{alt}</span>");
-                        } else {
-                            var path = DefaultPath != ImagePath ? ImagePath : DefaultPath + EmojiSize + "/";
-                            return string.Format($@"<img class=""emojione"" alt=""{alt}""{title} src=""{path}{codepoint}{FileExtension}"" />");
+                    if (SHORTNAMES.ContainsKey(shortname)) {
+                        var codepoint = SHORTNAMES[shortname];
+                        var emoji = GetEmoji(codepoint);
+                        if (emoji != null) {
+                            string title = ImageTitleTag ? $@" title=""{shortname}""" : "";
+                            string alt = unicodeAlt ? ToUnicode(codepoint) : shortname;
+                            if (sprite) {
+                                string category = codepoint.IndexOf("-1f3f") >= 0 ? "diversity" : emoji[CATEGORY_INDEX];
+                                return string.Format($@"<span class=""emojione emojione-{EmojiSize}-{category} _{codepoint}""{title}>{alt}</span>");
+                            } else {
+                                var path = DefaultPath != ImagePath ? ImagePath : DefaultPath + EmojiSize + "/";
+                                return string.Format($@"<img class=""emojione"" alt=""{alt}""{title} src=""{path}{codepoint}{FileExtension}"" />");
+                            }
                         }
                     }
 
@@ -193,8 +196,9 @@ namespace EmojiOne {
                     // check if the emoji exists in our dictionary
                     var unicode = match.Groups[1].Value;
                     var codepoint = ToCodePoint(unicode);
-                    if (CODEPOINT_TO_SHORTNAME.ContainsKey(codepoint)) {
-                        return CODEPOINT_TO_SHORTNAME[codepoint];
+                    var emoji = GetEmoji(codepoint);
+                    if (emoji != null) {
+                        return emoji[SHORTNAME_INDEX];
                     }
 
                     // we didn't find a replacement so just return the entire match
@@ -216,12 +220,13 @@ namespace EmojiOne {
                 str = Regex.Replace(str, IGNORE_PATTERN + "|" + UNICODE_PATTERN, match => {
                     // check if the emoji exists in our dictionary
                     var codepoint = ToCodePoint(match.Groups[1].Value);
-                    if (CODEPOINT_TO_SHORTNAME.ContainsKey(codepoint)) {
-                        var shortname = CODEPOINT_TO_SHORTNAME[codepoint];
+                    var emoji = GetEmoji(codepoint);
+                    if (emoji != null) {
+                        var shortname = emoji[SHORTNAME_INDEX];
                         string title = ImageTitleTag ? $@" title=""{shortname}""" : "";
                         string alt = unicodeAlt ? ToUnicode(codepoint) : shortname;
                         if (sprite) {
-                            string category = codepoint.IndexOf("-1f3f") >= 0 ? "diversity" : SHORTNAME_TO_CATEGORY[shortname];
+                            string category = codepoint.IndexOf("-1f3f") >= 0 ? "diversity" :emoji[CATEGORY_INDEX];
                             return string.Format($@"<span class=""emojione emojione-{EmojiSize}-{category} _{codepoint}""{title}>{alt}</span>");
                         } else {
                             var path = DefaultPath != ImagePath ? ImagePath : DefaultPath + EmojiSize + "/";
@@ -246,9 +251,9 @@ namespace EmojiOne {
                 str = Regex.Replace(str, IGNORE_PATTERN + "|" + ASCII_PATTERN, match => {
                     // check if the emoji exists in our dictionary
                     var ascii = match.Value;
-                    if (ASCII_TO_CODEPOINT.ContainsKey(ascii)) {
+                    if (ASCII.ContainsKey(ascii)) {
                         // convert codepoint to unicode char
-                        return ToUnicode(ASCII_TO_CODEPOINT[ascii]);
+                        return ToUnicode(ASCII[ascii]);
                     }
                     // we didn't find a replacement so just return the entire match
                     return match.Value;
@@ -267,10 +272,11 @@ namespace EmojiOne {
                 str = Regex.Replace(str, IGNORE_PATTERN + "|" + ASCII_PATTERN, match => {
                     // check if the emoji exists in our dictionaries
                     var ascii = match.Value;
-                    if (ASCII_TO_CODEPOINT.ContainsKey(ascii)) {
-                        var codepoint = ASCII_TO_CODEPOINT[ascii];
-                        if (CODEPOINT_TO_SHORTNAME.ContainsKey(codepoint)) {
-                            return CODEPOINT_TO_SHORTNAME[codepoint];
+                    if (ASCII.ContainsKey(ascii)) {
+                        var codepoint = ASCII[ascii];
+                        var emoji = GetEmoji(codepoint);
+                        if (emoji != null) {
+                            return emoji[SHORTNAME_INDEX];
                         }
                     }
                     // we didn't find a replacement so just return the entire match
@@ -281,7 +287,22 @@ namespace EmojiOne {
         }
 
         /// <summary>
-        /// Convert a unicode character to its code point/code pair
+        /// Get emoji array for the specified codepoint.
+        /// </summary>
+        /// <param name="codepoint"></param>
+        /// <returns></returns>
+        internal static string[] GetEmoji(string codepoint) {
+            if (EMOJI.ContainsKey(codepoint)) {
+                return EMOJI[codepoint];
+            }
+            if (ALTERNATES.ContainsKey(codepoint) && EMOJI.ContainsKey(ALTERNATES[codepoint])) {
+                return EMOJI[ALTERNATES[codepoint]];
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Convert a unicode character to its code point/code pair(s)
         /// </summary>
         /// <param name="unicode"></param>
         /// <returns></returns>
@@ -297,9 +318,9 @@ namespace EmojiOne {
         }
 
         /// <summary>
-        /// Converts a unicode code point/code pair to a unicode character
+        /// Converts unicode code point/code pair(s) to a unicode character.
         /// </summary>
-        /// <param name="codepoints"></param>
+        /// <param name="codepoint"></param>
         /// <returns></returns>
         internal static string ToUnicode(string codepoint) {
             if (codepoint.Contains('-')) {
@@ -311,7 +332,7 @@ namespace EmojiOne {
                     if (part >= 0x10000 && part <= 0x10FFFF) {
                         var hi = Math.Floor((decimal)(part - 0x10000) / 0x400) + 0xD800;
                         var lo = ((part - 0x10000) % 0x400) + 0xDC00;
-                        hilos[i] = new String(new char[] { (char)hi, (char)lo });
+                        hilos[i] = new string(new char[] { (char)hi, (char)lo });
                     } else {
                         chars[i] = (char)part;
                     }
@@ -319,7 +340,7 @@ namespace EmojiOne {
                 if (hilos.Any(x => x != null)) {
                     return string.Concat(hilos);
                 } else {
-                    return new String(chars);
+                    return new string(chars);
                 }
 
             } else {
@@ -328,4 +349,5 @@ namespace EmojiOne {
             }
         }
     }
+
 }

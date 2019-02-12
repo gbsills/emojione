@@ -190,7 +190,7 @@ namespace EmojiOne.Tests {
 
             // shortname to unicode with code pairs
             text = ":nine:";
-            expected = "9️⃣";
+            expected = "9⃣";
             actual = EmojiOne.ShortnameToUnicode(text);
             Assert.AreEqual(expected, actual);
 

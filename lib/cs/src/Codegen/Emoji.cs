@@ -146,6 +146,11 @@ namespace Codegen {
         public string[] Keywords { get; set; }
 
         /// <summary>
+        /// Gets the svg markup for the emoji.
+        /// </summary>
+        public string Svg { get; set; }
+
+        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>
@@ -205,6 +210,19 @@ namespace Codegen {
         /// </summary>
         [JsonProperty("decimal")]
         public string Decimal { get; set; }
+
+        /// <summary>
+        /// Combination of <see cref="Base"/> and <see cref="DefaultMatches"/> codepoints used to identify native unicode.
+        /// </summary>
+        public string[] AlternateMatches {
+            get {
+                var codepoints = new List<string>(DefaultMatches);
+                if (codepoints.Contains(Base)) {
+                    codepoints.Remove(Base);
+                }
+                return codepoints.ToArray();
+            }
+        }
 
         /// <summary>
         /// Combination of <see cref="Base"/> and <see cref="DefaultMatches"/> codepoints used to identify native unicode.
