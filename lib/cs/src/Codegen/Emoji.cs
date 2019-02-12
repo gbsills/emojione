@@ -146,11 +146,6 @@ namespace Codegen {
         public string[] Keywords { get; set; }
 
         /// <summary>
-        /// Gets the svg markup for the emoji.
-        /// </summary>
-        public string Svg { get; set; }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <returns></returns>

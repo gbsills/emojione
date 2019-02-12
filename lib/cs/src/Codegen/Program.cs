@@ -25,11 +25,6 @@ namespace Codegen {
         public string SourceDir { get; set; } = "../../../EmojiOne";
 
         /// <summary>
-        /// Path to premium svg assets.
-        /// </summary>
-        public string SvgDir { get; set; } = "../../../../assets";
-
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="args"></param>
@@ -51,17 +46,6 @@ namespace Codegen {
                 string json = File.ReadAllText(EmojiFile);
                 var emojis = JsonConvert.DeserializeObject<Dictionary<string, Emoji>>(json);
 
-                // load svgs from disk (it's a good idea to run them through SvgCleaner first, see https://github.com/RazrFalcon/svgcleaner-gui)
-                if (Directory.Exists(SvgDir)) {
-                    foreach (var emoji in emojis.Values) {
-                        var path = Path.Combine(SvgDir, emoji.CodePoints.Base + ".svg");
-                        if (File.Exists(path)) {
-                            // keep only width, height and viewBox attributes
-                            emoji.Svg = RemoveAttributes(File.ReadAllText(path), "width", "height", "viewBox");
-                        }
-                    }
-                }
-
                 // write regex patternas and dictionaries to partial class
                 Directory.CreateDirectory(SourceDir);
                 file = new FileInfo(Path.Combine(SourceDir, "EmojiOne.generated.cs"));
@@ -78,8 +62,6 @@ namespace Codegen {
                     sw.WriteLine(@"        private const int CATEGORY_INDEX = 1;");
                     sw.WriteLine();
                     sw.WriteLine(@"        private const int ASCII_INDEX = 2;");
-                    sw.WriteLine();
-                    sw.WriteLine(@"        private const int SVG_INDEX = 3;");
                     sw.WriteLine();
                     var asciis = emojis.Values.Where(x => x.Ascii.Any());
                     sw.Write(@"        private const string ASCII_PATTERN = @""(?<=\s|^)(");
@@ -177,7 +159,7 @@ namespace Codegen {
 
                     for (int i = 0; i < emojis.Count; i++) {
                         var emoji = emojis.ElementAt(i).Value;
-                        sw.Write($@"            [""{emoji.CodePoints.Base}""] = new string[] {{""{emoji.Shortname}"", ""{emoji.Category}"", {(emoji.Ascii.Any() ? $@"""{emoji.Ascii.First().Replace("\\", "\\\\")}""" : "null")}, {(emoji.Svg != null ? $@"@""{emoji.Svg.Replace(@"""", @"""""")}""" : "null")}}}");
+                        sw.Write($@"            [""{emoji.CodePoints.Base}""] = new string[] {{""{emoji.Shortname}"", ""{emoji.Category}"", {(emoji.Ascii.Any() ? $@"""{emoji.Ascii.First().Replace("\\", "\\\\")}""" : "null")}}}");
                         if (i < emojis.Count - 1) {
                             sw.WriteLine(",");
                         }
