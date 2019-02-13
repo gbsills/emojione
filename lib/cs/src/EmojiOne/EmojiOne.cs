@@ -170,10 +170,10 @@ namespace EmojiOne {
                             string alt = unicodeAlt ? ToUnicode(codepoint) : shortname;
                             if (sprite) {
                                 string category = codepoint.IndexOf("-1f3f") >= 0 ? "diversity" : emoji[CATEGORY_INDEX];
-                                return string.Format($@"<span class=""emojione emojione-{EmojiSize}-{category} _{codepoint}""{title}>{alt}</span>");
+                                return $@"<span class=""emojione emojione-{EmojiSize}-{category} _{codepoint}""{title}>{alt}</span>";
                             } else {
                                 var path = DefaultPath != ImagePath ? ImagePath : DefaultPath + EmojiSize + "/";
-                                return string.Format($@"<img class=""emojione"" alt=""{alt}""{title} src=""{path}{codepoint}{FileExtension}"" />");
+                                return $@"<img class=""emojione"" alt=""{alt}""{title} src=""{path}{codepoint}{FileExtension}"" />";
                             }
                         }
                     }
@@ -227,10 +227,10 @@ namespace EmojiOne {
                         string alt = unicodeAlt ? ToUnicode(codepoint) : shortname;
                         if (sprite) {
                             string category = codepoint.IndexOf("-1f3f") >= 0 ? "diversity" :emoji[CATEGORY_INDEX];
-                            return string.Format($@"<span class=""emojione emojione-{EmojiSize}-{category} _{codepoint}""{title}>{alt}</span>");
+                            return $@"<span class=""emojione emojione-{EmojiSize}-{category} _{codepoint}""{title}>{alt}</span>";
                         } else {
                             var path = DefaultPath != ImagePath ? ImagePath : DefaultPath + EmojiSize + "/";
-                            return string.Format($@"<img class=""emojione"" alt=""{alt}""{title} src=""{path}{codepoint}{FileExtension}"" />");
+                            return $@"<img class=""emojione"" alt=""{alt}""{title} src=""{path}{codepoint}{FileExtension}"" />";
                         }
                     }
 
