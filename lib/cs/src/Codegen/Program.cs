@@ -17,7 +17,7 @@ namespace Codegen {
         /// <summary>
         /// Path to the emoji.json file.
         /// </summary>
-        public string EmojiFile { get; set; } = "../../../../../../emoji.json";
+        public string EmojiFile { get; set; } = "../../../../emoji.json";
 
         /// <summary>
         /// Path where generated source file will be created.
